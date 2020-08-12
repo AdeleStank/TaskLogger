@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">TaskLogger</string>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First fragment</string>
+    <string name="second_fragment_label">Second fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="add_new_task">Add New Task</string>
+    <string name="save_text">Save</string>
+    <string name="task_name_hint">Enter the name of your task</string>
+    <string name="task_deadline_hint">Enter the deadline (optional)</string>
+    <string name="task_description_hint">Describe your task (optional)</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="deldiag_positive_caption">Delete</string>
+    <string name="cancelEditDiag_message">You have unsaved changes that will be lost after exiting editing mode. Do you still want to exit?</string>
+    <string name="cancelEditDiag_positive_caption">Exit</string>
+    <string name="cancelEditDiag_negative_caption">Continue editing</string>
+</resources>

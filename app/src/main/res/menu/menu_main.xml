@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="adeles.kotlinpractice.tasklogger.MainActivity">
+    <item
+        android:id="@+id/mnu_add_task"
+        android:icon="@android:drawable/ic_menu_add"
+        android:orderInCategory="100"
+        android:title="@string/add_new_task"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/mnu_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:orderInCategory="101"
+        android:title="@string/action_settings"
+        app:showAsAction="never|ifRoom" />
+</menu>
