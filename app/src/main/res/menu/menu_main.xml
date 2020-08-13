@@ -14,4 +14,7 @@
         android:orderInCategory="101"
         android:title="@string/action_settings"
         app:showAsAction="never|ifRoom" />
+    <item
+        android:id="@+id/mnu_done_tasks"
+        android:title="@string/done_tasks_header" />
 </menu>

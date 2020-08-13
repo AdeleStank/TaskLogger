@@ -1,5 +1,6 @@
 package adeles.kotlinpractice.tasklogger
 
+import android.app.Application
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
@@ -14,6 +15,7 @@ import kotlinx.android.synthetic.main.fragment_main.*
 
 private const val TAG = "MainActivityFragment"
 private const val DIALOG_ID_DELETE = 1
+private const val DIALOG_ID_DONE = 2
 private const val DIALOG_TASK_ID = "task_id"
 
 class MainFragment : Fragment(), CursorRecyclerViewAdapter.OnTaskClickListener,
@@ -78,7 +80,14 @@ class MainFragment : Fragment(), CursorRecyclerViewAdapter.OnTaskClickListener,
     }
 
     override fun onDoneClick(task: Task) {
-        TODO("Not yet implemented")
+        val args = Bundle().apply {
+            putInt(DIALOG_ID, DIALOG_ID_DONE)
+            putString(DIALOG_MESSAGE, "Do you want to mark this task as done?")
+            putLong(DIALOG_TASK_ID, task.id)   // pass the id in the arguments, so we can retrieve it when we get called back.
+        }
+        val dialog = AppDialog()
+        dialog.arguments = args
+        dialog.show(childFragmentManager, null)
     }
 
     override fun onTaskLongClick(task: Task) {
@@ -92,6 +101,10 @@ class MainFragment : Fragment(), CursorRecyclerViewAdapter.OnTaskClickListener,
             val taskId = args.getLong(DIALOG_TASK_ID)
             if (BuildConfig.DEBUG && taskId == 0L) throw AssertionError("Task ID is zero")
             viewModel.deleteTask(taskId)
+        } else if (dialogId == DIALOG_ID_DONE){
+            val taskId = args.getLong(DIALOG_TASK_ID)
+            if (BuildConfig.DEBUG && taskId == 0L) throw AssertionError("Task ID is zero")
+            viewModel.moveTaskToDone(taskId)
         }
     }
 

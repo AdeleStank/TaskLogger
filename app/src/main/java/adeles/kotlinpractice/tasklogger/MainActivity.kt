@@ -1,5 +1,6 @@
 package adeles.kotlinpractice.tasklogger
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
@@ -47,7 +48,7 @@ class MainActivity : AppCompatActivity(), AddEditTaskFragment.OnSaveClicked,
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
      when (item.itemId) {
-            R.id.mnu_add_task -> taskEditRequest(null)
+         R.id.mnu_add_task -> taskEditRequest(null)
         //    R.id.mnu_settings -> true
          android.R.id.home -> {
              Log.d(TAG, "onOptionsItemSelected: home button pressed")
@@ -62,7 +63,11 @@ class MainActivity : AppCompatActivity(), AddEditTaskFragment.OnSaveClicked,
                  removeEditPane(fragment)
              }
          }
-        }
+         R.id.mnu_done_tasks -> {
+             val intent = Intent(this, DoneTasksActivity::class.java)
+             startActivity(intent)
+         }
+     }
         return super.onOptionsItemSelected(item)
     }
 

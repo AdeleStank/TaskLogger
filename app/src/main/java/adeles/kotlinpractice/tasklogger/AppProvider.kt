@@ -15,6 +15,8 @@ const val CONTENT_AUTHORITY = "adeles.kotlinpractice.tasklogger.provider"
 
 private const val TASKS = 100
 private const val TASKS_ID = 101
+private const val DONE_TASKS = 200
+private const val DONE_TASKS_ID = 201
 
 val CONTENT_AUTHORITY_URI: Uri = Uri.parse("content://$CONTENT_AUTHORITY")
 
@@ -27,6 +29,8 @@ class AppProvider: ContentProvider() {
 
         matcher.addURI(CONTENT_AUTHORITY, TasksContract.TABLE_NAME, TASKS)
         matcher.addURI(CONTENT_AUTHORITY, "${TasksContract.TABLE_NAME}/#", TASKS_ID)
+        matcher.addURI(CONTENT_AUTHORITY, DoneTasksContract.TABLE_NAME, DONE_TASKS)
+        matcher.addURI(CONTENT_AUTHORITY, "${DoneTasksContract.TABLE_NAME}/#", DONE_TASKS_ID)
 
         return matcher
     }
@@ -55,6 +59,15 @@ class AppProvider: ContentProvider() {
                 queryBuilder.appendWhereEscapeString("$taskId")
             }
 
+            DONE_TASKS -> queryBuilder.tables = DoneTasksContract.TABLE_NAME
+
+            DONE_TASKS_ID -> {
+                queryBuilder.tables = DoneTasksContract.TABLE_NAME
+                val doneTaskId = DoneTasksContract.getId(uri)
+                queryBuilder.appendWhere("${DoneTasksContract.Columns.ID} = ")
+                queryBuilder.appendWhereEscapeString("$doneTaskId")
+            }
+
             else -> throw IllegalArgumentException("Unknown URI: $uri")
         }
 
@@ -80,6 +93,16 @@ class AppProvider: ContentProvider() {
                 recordId = db.insert(TasksContract.TABLE_NAME, null, values)
                 if(recordId != -1L) {
                     returnUri = TasksContract.buildUriFromId(recordId)
+                } else {
+                    throw SQLException("Failed to insert, Uri was $uri")
+                }
+            }
+
+            DONE_TASKS -> {
+                val db = AppDatabase.getInstance(context!!).writableDatabase //TODO: fix the nullable context problem
+                recordId = db.insert(DoneTasksContract.TABLE_NAME, null, values)
+                if(recordId != -1L) {
+                    returnUri = DoneTasksContract.buildUriFromId(recordId)
                 } else {
                     throw SQLException("Failed to insert, Uri was $uri")
                 }
@@ -126,6 +149,23 @@ class AppProvider: ContentProvider() {
                 count = db.update(TasksContract.TABLE_NAME, values, selectionCriteria, selectionArgs)
             }
 
+            DONE_TASKS -> {
+                val db = AppDatabase.getInstance(context!!).writableDatabase //TODO: fix the nullable context problem
+                count = db.update(DoneTasksContract.TABLE_NAME, values, selection, selectionArgs)
+            }
+
+            DONE_TASKS_ID -> {
+                val db = AppDatabase.getInstance(context!!).writableDatabase //TODO: fix the nullable context problem
+                val id = DoneTasksContract.getId(uri)
+                selectionCriteria = "${DoneTasksContract.Columns.ID} = $id"
+
+                if(selection != null && selection.isNotEmpty()) {
+                    selectionCriteria += " AND ($selection)"
+                }
+
+                count = db.update(DoneTasksContract.TABLE_NAME, values, selectionCriteria, selectionArgs)
+            }
+
             else -> throw IllegalArgumentException("Unknown uri: $uri")
         }
 
@@ -165,6 +205,23 @@ class AppProvider: ContentProvider() {
                 count = db.delete(TasksContract.TABLE_NAME, selectionCriteria, selectionArgs)
             }
 
+            DONE_TASKS -> {
+                val db = AppDatabase.getInstance(context!!).writableDatabase //TODO: fix the nullable context problem
+                count = db.delete(DoneTasksContract.TABLE_NAME, selection, selectionArgs)
+            }
+
+            DONE_TASKS_ID -> {
+                val db = AppDatabase.getInstance(context!!).writableDatabase //TODO: fix the nullable context problem
+                val id = DoneTasksContract.getId(uri)
+                selectionCriteria = "${DoneTasksContract.Columns.ID} = $id"
+
+                if(selection != null && selection.isNotEmpty()) {
+                    selectionCriteria += " AND ($selection)"
+                }
+
+                count = db.delete(DoneTasksContract.TABLE_NAME, selectionCriteria, selectionArgs)
+            }
+
             else -> throw IllegalArgumentException("Unknown uri: $uri")
         }
 
@@ -179,11 +236,16 @@ class AppProvider: ContentProvider() {
         return count
     }
 
+
     override fun getType(uri: Uri): String? {
         return when (uriMatcher.match(uri)) {
             TASKS -> TasksContract.CONTENT_TYPE
 
             TASKS_ID -> TasksContract.CONTENT_ITEM_TYPE
+
+            DONE_TASKS -> DoneTasksContract.CONTENT_TYPE
+
+            DONE_TASKS_ID -> DoneTasksContract.CONTENT_ITEM_TYPE
 
             else -> throw IllegalArgumentException("unknown Uri: $uri")
         }

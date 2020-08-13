@@ -1,5 +1,7 @@
 package adeles.kotlinpractice.tasklogger
 
+import DoneTasksViewModel
+import android.annotation.SuppressLint
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
@@ -10,7 +12,11 @@ import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
 import android.os.Handler
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import java.lang.IllegalStateException
+import java.time.LocalDate
+import java.time.LocalDateTime
 import kotlin.concurrent.thread
 
 private const val TAG = "TLViewModel"
@@ -28,6 +34,7 @@ class TaskLoggerViewModel (application: Application): AndroidViewModel(applicati
 
     init{
         Log.d(TAG, "TaskLoggerViewModel: created")
+
         getApplication<Application>().contentResolver.
             registerContentObserver(TasksContract.CONTENT_URI,true, contentObserver)
         loadTasks()
@@ -85,8 +92,53 @@ class TaskLoggerViewModel (application: Application): AndroidViewModel(applicati
         return task
     }
 
+    @SuppressLint("NewApi")
+    fun moveTaskToDone(taskId: Long): DoneTask{
+        val uri = TasksContract.buildUriFromId(taskId)
+        val cursor = getApplication<Application>().contentResolver?.query(TasksContract.buildUriFromId(taskId), null, null,null,null)
+        cursor!!.moveToNext()
+            val task = Task(
+                cursor.getString(cursor.getColumnIndex(TasksContract.Columns.TASK_NAME)),
+                cursor.getString(cursor.getColumnIndex(TasksContract.Columns.TASK_DEADLINE)),
+                cursor.getString(cursor.getColumnIndex(TasksContract.Columns.TASK_DESCRIPTION))
+            )
+
+            val doneTask = DoneTask(task.name, LocalDate.now().toString(), task.description)
+            saveDoneTask(doneTask)
+            Log.d(TAG, "saving done task")
+            deleteTask(taskId)
+            Log.d(TAG, "deleting a task")
+            return doneTask
+    }
+
     override fun onCleared() {
         Log.d(TAG, "OnCleared: called")
         getApplication<Application>().contentResolver.unregisterContentObserver(contentObserver)
+    }
+
+    // TODO find a way to make it work without copy pasting code
+    fun saveDoneTask(doneTask: DoneTask): DoneTask {
+        val values = ContentValues()
+
+        values.put(DoneTasksContract.Columns.TASK_NAME, doneTask.name)
+        values.put(DoneTasksContract.Columns.TASK_DONE_DATE, doneTask.doneDate)
+        values.put(DoneTasksContract.Columns.TASK_DESCRIPTION, doneTask.description)
+
+        if(doneTask.id == 0L){
+            thread{
+                Log.d(TAG, "saveTask: adding new task to done tasks")
+                val uri = getApplication<Application>().contentResolver?.insert(DoneTasksContract.CONTENT_URI, values)
+                if (uri != null){
+                    doneTask.id = DoneTasksContract.getId(uri)
+                    Log.d(TAG, "new id is $doneTask.id")
+                }
+            }
+        } else{
+            thread {
+                Log.d(TAG, "saveTask: updating existing task")
+                getApplication<Application>().contentResolver?.update(DoneTasksContract.buildUriFromId(doneTask.id), values, null, null)
+            }
+        }
+        return doneTask
     }
 }

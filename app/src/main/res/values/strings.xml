@@ -18,4 +18,5 @@
     <string name="cancelEditDiag_message">You have unsaved changes that will be lost after exiting editing mode. Do you still want to exit?</string>
     <string name="cancelEditDiag_positive_caption">Exit</string>
     <string name="cancelEditDiag_negative_caption">Continue editing</string>
+    <string name="done_tasks_header">Done Tasks</string>
 </resources>

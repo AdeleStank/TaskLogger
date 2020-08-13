@@ -1,5 +1,6 @@
 package adeles.kotlinpractice.tasklogger
 
+import android.annotation.SuppressLint
 import android.database.Cursor
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -46,6 +47,27 @@ class TaskViewHolder(override val containerView: View) :
             true
         }
     }
+
+    @SuppressLint("SetTextI18n")
+    fun bindDone(doneTask: DoneTask, listener: DoneTaskCursorRVAdapter.OnDoneTaskClickListener) {
+        ts_name.text = doneTask.name
+        ts_deadline.text = "Finished on: ${doneTask.doneDate}"
+        ts_description.text = doneTask.description
+        ts_edit.visibility = View.GONE
+        ts_delete.visibility = View.VISIBLE
+        ts_done.visibility = View.GONE
+
+        ts_delete.setOnClickListener {
+            Log.d(TAG, "Delete button tapped")
+            listener.onDeleteDoneClick(doneTask)
+        }
+
+//        containerView.setOnLongClickListener {
+//            Log.d(TAG, "onLongClick tapped")
+//            listener.onTaskLongClick(task)
+//            true
+//        }
+    }
 }
 
 class CursorRecyclerViewAdapter (private var cursor : Cursor?, private val listener: OnTaskClickListener)
@@ -89,12 +111,6 @@ class CursorRecyclerViewAdapter (private var cursor : Cursor?, private val liste
             )
             task.id = cursor.getLong(cursor.getColumnIndex(TasksContract.Columns.ID))
 
-//            holder.ts_name.text = task.name
-//            holder.ts_deadline.text = task.deadline
-//            holder.ts_description.text = task.description
-//            holder.ts_done.visibility = View.VISIBLE
-//            holder.ts_edit.visibility = View.VISIBLE
-//            holder.ts_delete.visibility = View.VISIBLE
             holder.bind(task, listener)
         }
     }
