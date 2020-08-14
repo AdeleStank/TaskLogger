@@ -39,7 +39,6 @@ class AddEditTaskFragment : Fragment() {
 
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(TAG, "onViewCreated: called")
         if (savedInstanceState == null) {
             val task = task
             if (task != null) {
@@ -55,7 +54,6 @@ class AddEditTaskFragment : Fragment() {
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        Log.d(TAG, "onActivityCreated: starts")
         super.onActivityCreated(savedInstanceState)
 
         if (listener is AppCompatActivity) {
@@ -70,7 +68,6 @@ class AddEditTaskFragment : Fragment() {
     }
 
     override fun onAttach(context: Context?) {
-        Log.d(TAG, "onAttach: started")
         super.onAttach(context)
         if (context is OnSaveClicked) {
             listener = context
@@ -80,16 +77,15 @@ class AddEditTaskFragment : Fragment() {
     }
 
     override fun onDetach() {
-        Log.d(TAG, "onDetach: starts")
         super.onDetach()
         listener = null
     }
 
-    fun taskFromUI(): Task{
+    private fun taskFromUI(): Task{
         val deadline = if (add_edit_deadline.text.isNotEmpty()){
             add_edit_deadline.text.toString()
         } else{
-            "no deadline"
+            getString(R.string.deadline_default)
         }
 
         val newTask = Task(add_edit_name.text.toString(), deadline, add_edit_description.text.toString())
@@ -109,9 +105,7 @@ class AddEditTaskFragment : Fragment() {
     private fun saveTask() {
         val newTask = taskFromUI()
         if(newTask != task){
-            Log.d(TAG, "Saving task, task id is ${newTask.id}")
             task = viewModel.saveTask(newTask)
-            Log.d(TAG, "Saving task, task id is ${task?.id}")
         }
     }
 

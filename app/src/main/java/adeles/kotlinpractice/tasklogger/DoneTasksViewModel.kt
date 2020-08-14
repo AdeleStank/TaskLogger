@@ -13,6 +13,8 @@ import android.net.Uri
 import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.concurrent.thread
 
 private const val TAG = "DTViewModel"
@@ -20,7 +22,6 @@ private const val TAG = "DTViewModel"
 class DoneTasksViewModel (application: Application): AndroidViewModel(application) {
     private val contentObserver = object: ContentObserver(Handler()){
         override fun onChange(selfChange: Boolean, uri: Uri?) {
-            Log.d(TAG, "contentObserver: onChange: called with uri $uri")
             loadDoneTasks()
         }
     }
@@ -29,15 +30,12 @@ class DoneTasksViewModel (application: Application): AndroidViewModel(applicatio
         get() = databaseCursor
 
     init{
-        Log.d(TAG, "TaskLoggerViewModel: created")
-
         getApplication<Application>().contentResolver.
         registerContentObserver(DoneTasksContract.CONTENT_URI,true, contentObserver)
         loadDoneTasks()
     }
 
     private fun loadDoneTasks(){
-        Log.d(TAG, "LoadTasks: started")
         val projection = arrayOf(
             DoneTasksContract.Columns.ID,
             DoneTasksContract.Columns.TASK_NAME,
@@ -46,18 +44,16 @@ class DoneTasksViewModel (application: Application): AndroidViewModel(applicatio
 
         val sortOrder = "${DoneTasksContract.Columns.TASK_NAME}"
 
-        thread{
+        GlobalScope.launch{
             val cursor = getApplication<Application>().contentResolver.query(
                 DoneTasksContract.CONTENT_URI,
                 projection, null, null, sortOrder)
             databaseCursor.postValue(cursor)
         }
-
-        Log.d(TAG, "databaseCursor: $databaseCursor")
     }
 
     fun deleteDoneTask(doneTaskId: Long){
-        thread{
+        GlobalScope.launch{
             getApplication<Application>().contentResolver?.delete(
                 DoneTasksContract.buildUriFromId(doneTaskId),
                 null, null)}
@@ -70,27 +66,17 @@ class DoneTasksViewModel (application: Application): AndroidViewModel(applicatio
             values.put(DoneTasksContract.Columns.TASK_DONE_DATE, doneTask.doneDate)
             values.put(DoneTasksContract.Columns.TASK_DESCRIPTION, doneTask.description)
 
-
-        if(doneTask.id == 0L){
-            thread{
-                Log.d(TAG, "saveTask: adding new task to done tasks")
+        GlobalScope.launch{
                 val uri = getApplication<Application>().contentResolver?.insert(DoneTasksContract.CONTENT_URI, values)
                 if (uri != null){
                     doneTask.id = DoneTasksContract.getId(uri)
-                    Log.d(TAG, "new id is $doneTask.id")
                 }
             }
-        } else{
-            thread {
-                Log.d(TAG, "saveTask: updating existing task")
-                getApplication<Application>().contentResolver?.update(DoneTasksContract.buildUriFromId(doneTask.id), values, null, null)
-            }
-        }
+
         return doneTask
     }
 
     override fun onCleared() {
-        Log.d(TAG, "OnCleared: called")
         getApplication<Application>().contentResolver.unregisterContentObserver(contentObserver)
     }
 }

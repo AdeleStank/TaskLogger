@@ -14,6 +14,8 @@ import android.net.Uri
 import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -24,7 +26,6 @@ private const val TAG = "TLViewModel"
 class TaskLoggerViewModel (application: Application): AndroidViewModel(application) {
     private val contentObserver = object: ContentObserver(Handler()){
         override fun onChange(selfChange: Boolean, uri: Uri?) {
-            Log.d(TAG, "contentObserver: onChange: called with uri $uri")
             loadTasks()
         }
     }
@@ -33,15 +34,12 @@ class TaskLoggerViewModel (application: Application): AndroidViewModel(applicati
         get() = databaseCursor
 
     init{
-        Log.d(TAG, "TaskLoggerViewModel: created")
-
         getApplication<Application>().contentResolver.
             registerContentObserver(TasksContract.CONTENT_URI,true, contentObserver)
         loadTasks()
     }
 
     private fun loadTasks(){
-        Log.d(TAG, "LoadTasks: started")
         val projection = arrayOf(TasksContract.Columns.ID,
         TasksContract.Columns.TASK_NAME,
         TasksContract.Columns.TASK_DEADLINE,
@@ -49,17 +47,15 @@ class TaskLoggerViewModel (application: Application): AndroidViewModel(applicati
 
         val sortOrder = "${TasksContract.Columns.TASK_NAME}"
 
-        thread{
+        GlobalScope.launch{
             val cursor = getApplication<Application>().contentResolver.query(TasksContract.CONTENT_URI,
                 projection, null, null, sortOrder)
             databaseCursor.postValue(cursor)
         }
-
-        Log.d(TAG, "databaseCursor: $databaseCursor")
     }
 
     fun deleteTask(taskId: Long){
-        thread{
+        GlobalScope.launch{
             getApplication<Application>().contentResolver?.delete(TasksContract.buildUriFromId(taskId),
                 null, null)}
     }
@@ -74,17 +70,14 @@ class TaskLoggerViewModel (application: Application): AndroidViewModel(applicati
         }
 
         if(task.id == 0L){
-            thread{
-                Log.d(TAG, "saveTask: adding new task")
+            GlobalScope.launch{
                 val uri = getApplication<Application>().contentResolver?.insert(TasksContract.CONTENT_URI, values)
                 if (uri != null){
                     task.id = TasksContract.getId(uri)
-                    Log.d(TAG, "new id is $task.id")
                 }
             }
         } else{
-            thread {
-                Log.d(TAG, "saveTask: updating existing task")
+            GlobalScope.launch {
                 getApplication<Application>().contentResolver?.update(TasksContract.buildUriFromId(task.id), values, null, null)
             }
 
@@ -105,14 +98,11 @@ class TaskLoggerViewModel (application: Application): AndroidViewModel(applicati
 
             val doneTask = DoneTask(task.name, LocalDate.now().toString(), task.description)
             saveDoneTask(doneTask)
-            Log.d(TAG, "saving done task")
             deleteTask(taskId)
-            Log.d(TAG, "deleting a task")
             return doneTask
     }
 
     override fun onCleared() {
-        Log.d(TAG, "OnCleared: called")
         getApplication<Application>().contentResolver.unregisterContentObserver(contentObserver)
     }
 
@@ -124,21 +114,13 @@ class TaskLoggerViewModel (application: Application): AndroidViewModel(applicati
         values.put(DoneTasksContract.Columns.TASK_DONE_DATE, doneTask.doneDate)
         values.put(DoneTasksContract.Columns.TASK_DESCRIPTION, doneTask.description)
 
-        if(doneTask.id == 0L){
-            thread{
-                Log.d(TAG, "saveTask: adding new task to done tasks")
+            GlobalScope.launch{
                 val uri = getApplication<Application>().contentResolver?.insert(DoneTasksContract.CONTENT_URI, values)
                 if (uri != null){
                     doneTask.id = DoneTasksContract.getId(uri)
                     Log.d(TAG, "new id is $doneTask.id")
                 }
             }
-        } else{
-            thread {
-                Log.d(TAG, "saveTask: updating existing task")
-                getApplication<Application>().contentResolver?.update(DoneTasksContract.buildUriFromId(doneTask.id), values, null, null)
-            }
-        }
         return doneTask
     }
 }

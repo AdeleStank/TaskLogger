@@ -12,21 +12,13 @@ private const val DATABASE_VERSION = 2
 
 internal class AppDatabase private constructor(context: Context): SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
-    init {
-        Log.d(TAG, "AppDatabase: initialising")
-    }
-
     override fun onCreate(db: SQLiteDatabase) {
-        // CREATE TABLE Tasks (_id INTEGER PRIMARY KEY NOT NULL, Name TEXT NOT NULL, Description TEXT, SortOrder INTEGER);
-        Log.d(TAG, "onCreate: starts")
+        //creating tables
         addTasksTable(db)
-        Log.d(TAG, "onCreate: Tasks table added")
         addDoneTasksTable(db)
-        Log.d(TAG, "onCreate: DoneTasks table added")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        Log.d(TAG, "onUpgrade: starts")
         when(oldVersion) {
             1 -> {
                 addDoneTasksTable(db)
@@ -41,7 +33,6 @@ internal class AppDatabase private constructor(context: Context): SQLiteOpenHelp
             ${TasksContract.Columns.TASK_NAME} TEXT NOT NULL,
             ${TasksContract.Columns.TASK_DESCRIPTION} TEXT,
             ${TasksContract.Columns.TASK_DEADLINE} TEXT);""".replaceIndent(" ")
-        Log.d(TAG, sSQL)
         db.execSQL(sSQL)
     }
 
@@ -51,7 +42,6 @@ internal class AppDatabase private constructor(context: Context): SQLiteOpenHelp
             ${DoneTasksContract.Columns.TASK_NAME} TEXT NOT NULL,
             ${DoneTasksContract.Columns.TASK_DESCRIPTION} TEXT,
             ${DoneTasksContract.Columns.TASK_DONE_DATE} TEXT NOT NULL);""".replaceIndent(" ")
-        Log.d(TAG, sSQL)
         db.execSQL(sSQL)
     }
 

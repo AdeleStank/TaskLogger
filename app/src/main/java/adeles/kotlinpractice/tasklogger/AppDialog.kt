@@ -26,7 +26,6 @@ class AppDialog: AppCompatDialogFragment() {
     }
 
     override fun onAttach(context: Context) {
-        Log.d(TAG, "onAttach: called, context is $context")
         super.onAttach(context)
 
         // Checking if fragment/activity implements DialogEvents interface
@@ -47,8 +46,6 @@ class AppDialog: AppCompatDialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        Log.d(TAG, "onCreateDialog called")
-
         val builder = AlertDialog.Builder(context!!)
 
         val arguments = arguments

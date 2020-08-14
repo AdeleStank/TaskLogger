@@ -47,7 +47,7 @@ class DoneTasksActivity : AppCompatActivity(),
     override fun onDeleteDoneClick(doneTask: DoneTask) {
         val args = Bundle().apply {
             putInt(DIALOG_ID, DIALOG_ID_DELETE)
-            putString(DIALOG_MESSAGE, "Do you want to delete?")
+            putString(DIALOG_MESSAGE, getString(R.string.diag_delete_message))
             putInt(DIALOG_POSITIVE_RID, R.string.deldiag_positive_caption)
             putLong(DIALOG_TASK_ID, doneTask.id)   // pass the id in the arguments, so we can retrieve it when we get called back.
         }
@@ -57,8 +57,6 @@ class DoneTasksActivity : AppCompatActivity(),
     }
 
     override fun onPositiveDialogResult(dialogId: Int, args: Bundle) {
-        Log.d(TAG, "onPositiveDialogResult: called with id $dialogId")
-
         if (dialogId == DIALOG_ID_DELETE) {
             val doneTaskId = args.getLong(DIALOG_TASK_ID)
             if (BuildConfig.DEBUG && doneTaskId == 0L) throw AssertionError("Task ID is zero")

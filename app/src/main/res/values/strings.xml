@@ -19,4 +19,7 @@
     <string name="cancelEditDiag_positive_caption">Exit</string>
     <string name="cancelEditDiag_negative_caption">Continue editing</string>
     <string name="done_tasks_header">Done Tasks</string>
+    <string name="deadline_default">no deadline</string>
+    <string name="diag_delete_message">Do you want to permanently delete this task?</string>
+    <string name="diag_done_message">Do you want to mark this task as done? You will still be able to see it in done tasks section but you will not be able to edit it.</string>
 </resources>

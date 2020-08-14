@@ -6,13 +6,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.task_summary.*
 import java.lang.IllegalStateException
-import java.util.concurrent.CyclicBarrier
 
 private const val TAG = "DTCursorRVAdapter"
+
+//TODO try to make CRViewAdapter usable for both cases so this class is not needed anymore
 
 class DoneTaskCursorRVAdapter(private var cursor : Cursor?, private val listener: OnDoneTaskClickListener)
     : RecyclerView.Adapter<TaskViewHolder>() {
@@ -23,16 +22,12 @@ class DoneTaskCursorRVAdapter(private var cursor : Cursor?, private val listener
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
-        Log.d(TAG, "onCreateViewHolder: starts")
         val view = LayoutInflater.from(parent.context).inflate(R.layout.task_summary, parent, false)
         return TaskViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        Log.d(TAG, "onBindViewHolder: starts")
         val cursor = cursor
-
-        Log.d(TAG, "cursor: $cursor")
 
         if (cursor == null || cursor.count == 0){
             Log.d(TAG, "OnBindViewHolder: providing an example")
@@ -58,16 +53,12 @@ class DoneTaskCursorRVAdapter(private var cursor : Cursor?, private val listener
     }
 
     override fun getItemCount(): Int {
-        Log.d(TAG, "getItemCount: starts")
-        Log.d(TAG, "cursor: $cursor")
         val cursor = cursor
-        val count = if (cursor == null || cursor.count == 0) {
+        return if (cursor == null || cursor.count == 0) {
             1   //fib, because we populate a single ViewHolder with instructions
         } else {
             cursor.count
         }
-        Log.d(TAG, "returning $count")
-        return count
     }
 
     fun swapCursor(newCursor: Cursor?): Cursor? {

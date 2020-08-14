@@ -49,11 +49,9 @@ class MainActivity : AppCompatActivity(), AddEditTaskFragment.OnSaveClicked,
         // as you specify a parent activity in AndroidManifest.xml.
      when (item.itemId) {
          R.id.mnu_add_task -> taskEditRequest(null)
-        //    R.id.mnu_settings -> true
          android.R.id.home -> {
              Log.d(TAG, "onOptionsItemSelected: home button pressed")
              val fragment = supportFragmentManager.findFragmentById(R.id.task_details_container)
-//                removeEditPane(fragment)
              if ((fragment is AddEditTaskFragment) && fragment.hasUnsavedData()) {
                  showConfirmationDialog(DIALOG_ID_CANCEL_EDIT,
                      getString(R.string.cancelEditDiag_message),
@@ -72,36 +70,22 @@ class MainActivity : AppCompatActivity(), AddEditTaskFragment.OnSaveClicked,
     }
 
     private fun taskEditRequest(task: Task?) {
-        Log.d(TAG, "taskEditRequest: starts")
-
-        // Create a new fragment to edit the task
-//        val newFragment = AddEditFragment.newInstance(task)
-//        supportFragmentManager.beginTransaction()
-//                .replace(R.id.task_details_container, newFragment)
-//                .commit()
-
         val newFragment = AddEditTaskFragment.newInstance(task)
         supportFragmentManager.beginTransaction().replace(R.id.task_details_container, newFragment).commit()
 
         showEditPane()
-
-        Log.d(TAG, "Exiting taskEditRequest")
     }
 
     override fun onSaveClicked() {
-        Log.d(TAG, "onSaveClicked: started")
         val fragment = supportFragmentManager.findFragmentById(R.id.task_details_container)
         removeEditPane(fragment)
-        Log.d(TAG, "onSaveClicked: finished")
     }
 
     private fun removeEditPane(fragment: Fragment? = null) {
-        Log.d(TAG, "removeEditPane called")
         if(fragment != null) {
             supportFragmentManager.beginTransaction()
                 .remove(fragment)
                 .commit()
-            //removeFragment(fragment)
         }
         // Make edit fragment invisible and main visible
         hideEditPane()
@@ -139,7 +123,6 @@ class MainActivity : AppCompatActivity(), AddEditTaskFragment.OnSaveClicked,
     }
 
     override fun onPositiveDialogResult(dialogId: Int, args: Bundle) {
-        Log.d(TAG, "onPositiveDialogResult: called with dialogId $dialogId")
         if (dialogId == DIALOG_ID_CANCEL_EDIT) {
             val fragment = supportFragmentManager.findFragmentById(R.id.task_details_container)
             removeEditPane(fragment)

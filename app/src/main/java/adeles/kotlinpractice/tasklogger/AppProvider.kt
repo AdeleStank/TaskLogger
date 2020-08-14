@@ -24,7 +24,6 @@ class AppProvider: ContentProvider() {
     private val uriMatcher by lazy { buildUriMatcher() }
 
     private fun buildUriMatcher() : UriMatcher {
-        Log.d(TAG, "buildUriMatcher: starts")
         val matcher = UriMatcher(UriMatcher.NO_MATCH)
 
         matcher.addURI(CONTENT_AUTHORITY, TasksContract.TABLE_NAME, TASKS)
@@ -43,9 +42,7 @@ class AppProvider: ContentProvider() {
     override fun query(uri: Uri, projection: Array<out String>?,
         selection: String?, selectionArgs: Array<out String>?, sortOrder: String?
     ): Cursor {
-        Log.d(TAG, "query: called with uri $uri")
         val match = uriMatcher.match(uri)
-        Log.d(TAG, "query: match is $match")
 
         val queryBuilder = SQLiteQueryBuilder()
 
@@ -73,16 +70,12 @@ class AppProvider: ContentProvider() {
 
         val db = AppDatabase.getInstance(context!!).readableDatabase //TODO: why is context nullable?
         val cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder)
-        Log.d(TAG, "query: cursor = $cursor")
-        Log.d(TAG, "query: rows in returned cursor = ${cursor.count}") // TODO remove this line
 
         return cursor
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
-        Log.d(TAG, "insert: called with uri $uri")
         val match = uriMatcher.match(uri)
-        Log.d(TAG, "insert: match is $match")
 
         val recordId: Long
         val returnUri: Uri
@@ -112,20 +105,16 @@ class AppProvider: ContentProvider() {
         }
 
         if (recordId > 0) {
-            Log.d(TAG, "insert: Setting notifyChange with $uri")
             context?.contentResolver?.notifyChange(uri, null)
         }
 
-        Log.d(TAG, "Exiting insert, returning $returnUri")
         return returnUri
     }
 
     override fun update(uri: Uri, values: ContentValues?,
         selection: String?, selectionArgs: Array<out String>?
     ): Int {
-        Log.d(TAG, "update: called with uri $uri")
         val match = uriMatcher.match(uri)
-        Log.d(TAG, "update: match is $match")
 
         val count: Int
         var selectionCriteria: String
@@ -170,18 +159,15 @@ class AppProvider: ContentProvider() {
         }
 
         if (count > 0) {
-            Log.d(TAG, "update: Setting notifyChange with $uri")
+            //notifying observer about update
             context?.contentResolver?.notifyChange(uri, null)
         }
 
-        Log.d(TAG, "Exiting update, returning $count")
         return count
     }
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int {
-        Log.d(TAG, "delete: called with uri $uri")
         val match = uriMatcher.match(uri)
-        Log.d(TAG, "delete: match is $match")
 
         val count: Int
         var selectionCriteria: String
@@ -227,12 +213,9 @@ class AppProvider: ContentProvider() {
 
         if (count > 0) {
             // something was deleted
-            Log.d(TAG, "delete: Setting notifyChange with $uri")
-
             context?.contentResolver?.notifyChange(uri, null)
         }
 
-        Log.d(TAG, "Exiting delete, returning $count")
         return count
     }
 
